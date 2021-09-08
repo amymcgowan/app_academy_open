@@ -1,3 +1,4 @@
+require "byebug"
 # Write a method, all_vowel_pairs, that takes in an array of words and returns all pairs of words
 # that contain every vowel. Vowels are the letters a, e, i, o, u. A pair should have its two words
 # in the same order as the original array. 
@@ -6,7 +7,22 @@
 #
 # all_vowel_pairs(["goat", "action", "tear", "impromptu", "tired", "europe"])   # => ["action europe", "tear impromptu"]
 def all_vowel_pairs(words)
+    all_pairs = []
+    
+    words.each_with_index do |word1, ind1|
+        words.each_with_index do |word2, ind2|
+            all_pairs << [word1, word2] if ind2 > ind1
+        end
+    end
 
+    vowels = ["a", "e", "i", "o", "u"]
+    all_vowels = []
+    all_pairs.each do |pair|
+        if vowels.all? { |vowel| pair.join(" ").include?(vowel) }
+            all_vowels << pair.join(" ")
+        end
+    end
+    all_vowels
 end
 
 
@@ -18,7 +34,7 @@ end
 # composite?(9)     # => true
 # composite?(13)    # => false
 def composite?(num)
-
+    (2...num).any? { |i| num % i == 0}
 end
 
 
@@ -32,7 +48,7 @@ end
 # find_bigrams("the theater is empty", ["cy", "em", "ty", "ea", "oo"])  # => ["em", "ty", "ea"]
 # find_bigrams("to the moon and back", ["ck", "oo", "ha", "at"])        # => ["ck", "oo"]
 def find_bigrams(str, bigrams)
-
+    bigrams.select { |bigram| str.include?(bigram) }
 end
 
 class Hash
@@ -50,7 +66,15 @@ class Hash
     # hash_2.my_select { |k, v| k + 1 == v }      # => {10=>11, 5=>6, 7=>8})
     # hash_2.my_select                            # => {4=>4}
     def my_select(&prc)
+        prc ||= Proc.new { |k,v| k==v }
 
+        new_hash = {}
+        self.each do |k,v|
+            if prc.call(k,v)
+                new_hash[k] = v
+            end
+        end
+        new_hash
     end
 end
 
@@ -64,7 +88,19 @@ class String
     # "cats".substrings     # => ["c", "ca", "cat", "cats", "a", "at", "ats", "t", "ts", "s"]
     # "cats".substrings(2)  # => ["ca", "at", "ts"]
     def substrings(length = nil)
+        subs = []
 
+        (0...self.length).each do |start_ind|
+            (start_ind...self.length).each do |end_ind|
+                subs << self[start_ind..end_ind]
+            end
+        end
+
+        if length.nil?
+            subs
+        else
+            subs.select {|sub| sub.length == length }
+        end
     end
 
 
@@ -78,6 +114,15 @@ class String
     # "bootcamp".caesar_cipher(2) #=> "dqqvecor"
     # "zebra".caesar_cipher(4)    #=> "difve"
     def caesar_cipher(num)
+        alpha = ("a".."z").to_a
 
+        new_word = ""
+        self.each_char do |char|
+            orig_ind = alpha.find_index(char)
+            new_ind = (orig_ind + num) % 26
+            new_word += alpha[new_ind]
+        end
+
+        new_word
     end
 end
